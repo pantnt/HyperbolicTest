@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+    </head>
+    <body>
+        <canvas id="BOX" width="2000" height="1125" style="height: 1080px;width: 1920px;background-color: black;left:0px;top: 0%;position: absolute;" ></canvas>
+        <script>
+            //set up&basic function v.alpha 1.1
+            //alpha 1.1 added:Float2
+            var cv=document.getElementById("BOX")
+            var ctx=cv.getContext("2d")
+            var cx;
+            var cy;
+
+            var cc=false;
+
+            //if the mouse is moved, update new cursor coordinate
+            document.onmousemove=function(e) {
+                cx = event.clientX/parseInt(cv.style.width)*2000-1000;
+                cy = event.clientY/parseInt(cv.style.height)*1125-562.5;
+                //console.log(cx,cy)
+            }
+            cv.addEventListener('mousedown',function(){
+                cc=true;
+            })
+            cv.addEventListener('mouseup',function(){
+                cc=false;
+            })
+            var speed=.001
+            var p18=Math.PI/180
+            //script
+            var lt=0
+            var fps=60
+            
+            var tick=0
+            var n=2
+            function clearScreen(){
+                ctx.clearRect(0,0,cv.width,cv.height)
+            }
+            function drawCircle(color,r,pos){
+                //console.log(1)
+                //console.log(arguments,pos)
+                //ctx.fillstyle=color
+                //ctx.arc(pos[0],pos[1],lw/2,0,2*Math.PI)
+                //ctx.arc(pos[pos.length-2],pos[pos.length-1],lw/2,0,2*Math.PI)
+                //ctx.fill()
+                ctx.beginPath()
+                ctx.lineWidth=1
+                ctx.strokeStyle=color
+                ctx.arc(pos[0]+1000,pos[1]+562,r,0,2*Math.PI)
+                ctx.stroke()
+            }
+            function drawLine(color,lw,pos){
+                //console.log(arguments,pos)
+                //ctx.fillstyle=color
+                //ctx.arc(pos[0],pos[1],lw/2,0,2*Math.PI)
+                //ctx.arc(pos[pos.length-2],pos[pos.length-1],lw/2,0,2*Math.PI)
+                //ctx.fill()
+                ctx.beginPath()
+                ctx.strokeStyle=color
+                ctx.lineWidth=lw
+                ctx.moveTo(pos[0]+1000,pos[1]+562)
+                
+                for(var x=2;x<pos.length;x+=2){
+                    ctx.lineTo(pos[x]+1000,pos[x+1]+562)    
+                }
+                ctx.stroke()
+            }
+            class Float2{
+                constructor(a,b){
+                    this.float1=a
+                    this.float2=b
+                }
+                cpy(n){
+                    this.float1=n.float1;
+                    this.float2=n.float2;
+                    return this;
+                }
+
+
+
+                add_by(b){
+                    this.float1+=b.float1;
+                    this.float2+=b.float2;
+                    return this;
+                };
+                subtract_by(b){
+                    this.float1-=b.float1;
+                    this.float2-=b.float2;
+                    return this;
+                };
+                vmultiply_by(b){
+                    this.float1*=b.float1;
+                    this.float2*=b.float2;
+                    return this;
+                };
+                vdivide_by(b){
+                    this.float1/=b.float1;
+                    this.float2/=b.float2;
+                    return this;
+                };
+                smultiply_by(b){
+                    this.float1*=b;
+                    this.float2*=b;
+                    return this;
+                };
+                sdivide_by(b){
+                    this.float1/=b;
+                    this.float2/=b;
+                    return this;
+                };
+                cmultiply_by(b){
+                    this.float1=this.float1*b.float1-this.float2*b.float2;
+                    this.float2=this.float1*b.float2-this.float2*b.float1;
+                    return this;
+                };
+                cdivide_by(b){
+                    this.float1=(this.float1*b.float1-this.float2*b.float2)/b.float1**2+b.float2**2;
+                    this.float2=(this.float1*b.float2-this.float2*b.float1)/b.float1**2+b.float2**2;
+                    return this;
+                };
+                
+
+
+                set vector1(a){
+                    this.float1=a
+                }
+                set vector2(a){
+                    this.float2=a
+                }
+                set v1(a){
+                    this.float1=a
+                }
+                set v2(a){
+                    this.float2=a
+                }
+                set f1(a){
+                    this.float1=a
+                }
+                set f2(a){
+                    this.float2=a
+                }
+                
+
+
+                get vector1(){
+                    return(this.float1)
+                }
+                get vector2(){
+                    return(this.float2)
+                }
+                get v1(){
+                    return(this.float1)
+                }
+                get v2(){
+                    return(this.float2)
+                }
+                get f1(){
+                    return(this.float1)
+                }
+                get f2(){
+                    return(this.float2)
+                }
+                
+                add(b){
+                    return(Float2.add(this,b));
+                };
+                subtract(b){
+                    return(Float2.sub(this,b));
+                };
+                vmultiply(b){
+                    return(Float2.vmult(this,b));
+                };
+                vdivide(b){
+                    return(Float2.vdiv(this,b));
+                };
+                smultiply(b){
+                    return(Float2.smult(this,b));
+                };
+                sdivide(b){
+                    return(Float2.sdiv(this,b));
+                };
+                cmultiply(b){
+                    return(Float2.cmult(this,b));
+                };
+                cdivide(b){
+                    return(Float2.cdiv(this,b));
+                };
+                normalize(){
+                    return(Float2.norm(this))
+                }
+                project_to(){
+                    return(Float2.projection(this,b))
+                }
+                distance_to(b){
+                    return(Float.dis_bet(this,b))
+                }
+                conj(){
+                    return new Float2(this.float1,-this.float2)
+                }
+
+
+                static ZERO(){
+                    return(new Float2(0,0));
+                };
+                static ONE(){
+                    return(new Float2(1,0))
+                }
+                static addition(a,b){
+                    return(new Float2(a.float1+b.float1,a.float2+b.float2));
+                };
+                static subtraction(a,b){
+                    return(new Float2(a.float1-b.float1,a.float2-b.float2));
+                };
+                static vmultiplication(a,b){
+                    return(new Float2(a.float1*b.float1,a.float2*b.float2));
+                };
+                static vdivision(a,b){
+                    return(new Float2(a.float1/b.float1,a.float2/b.float2));
+                };
+                static smultiplication(a,b){
+                    return(new Float2(a.float1*b,a.float2*b));
+                };
+                static sdivision(a,b){
+                    return(new Float2(a.float1/b,a.float2/b));
+                };
+                static cmultiplication(a,b){
+                    return(new Float2(a.float1*b.float1-a.float2*b.float2,a.float1*b.float2+a.float2*b.float1));
+                };
+                static cdivision(a,b){
+                    return(Float2.sdivision(Float2.cmultiplication(a,b),b.float1**2+b.float2**2));
+                };
+                static magnitude(a){
+                    return(Math.sqrt(a.float1**2+a.float2**2));
+                };
+                static normalize(a){
+                    return(Float2.magnitude(a));
+                };
+                static dot_product(a,b){
+                    return(a.float1*b.float1+a.float2*b.float2);
+                };
+                static projection(a,b){
+                    return(Float2.dot_product(a,b)/Float2.normalize(b));
+                };
+                static distance_between(a,b){
+                    return(Float2.norm(Float2.sub(a,b)));
+                };
+                static point_between(a,b,t){
+                    return(Float2.add(Float2.smult(Float2.sub(a,b),t),b))
+                }
+                static minfloat1(...a){
+                    var min=new Float2(0,0)
+                    for(var i in a){
+                        var ai=a[i]
+                        if(i==0||ai.float1<min.float1){
+                            min=ai
+                        }
+                    }
+                    return(min)
+                }
+                static minfloat2(...a){
+                    var min=new Float2(0,0)
+                    for(var i in a){
+                        var ai=a[i]
+                        if(i==0||ai.float2<min.float2){
+                            min=ai
+                        }
+                    }
+                    return(min)
+                }
+                static maxfloat1(...a){
+                    var max=new Float2(0,0)
+                    for(var i in a){
+                        var ai=a[i]
+                        if(i==0||ai.float1>max.float1){
+                            max=ai
+                        }
+                    }
+                    return(max)
+                }
+                static maxfloat2(...a){
+                    var max=new Float2(0,0)
+                    for(var i in a){
+                        var ai=a[i]
+                        if(i==0||ai.float2>max.float2){
+                            max=ai
+                        }
+                    }
+                    return(max)
+                }
+                
+
+
+                static add(a,b){
+                    return(Float2.addition(a,b,))
+                }
+                static sub(a,b){
+                    return(Float2.subtraction(a,b));
+                };
+                static vmult(a,b){
+                    return(Float2.vmultiplication(a,b));
+                };
+                static vdiv(a,b){
+                    return(Float2.vdivision(a,b));
+                };
+                static smult(a,b){
+                    return(Float2.smultiplication(a,b));
+                };
+                static sdiv(a,b){
+                    return(Float2.sdivision(a,b));
+                };
+                static cmult(a,b){
+                    return(Float2.cmultiplication(a,b));
+                };
+                static cdiv(a,b){
+                    return(Float2.cdivision(a,b));
+                };
+                static norm(a){
+                    return(Float2.normalize(a));
+                };
+                static dis_bet(a,b){
+                    return(Float2.distance_between(a,b));
+                };
+                static length_to_origin(a){
+                    return(Float2.magnitude(a));
+                };
+                static to_array(a){
+                    return([a.float1,a.float2])
+                }
+                
+
+
+
+
+            }
+            setInterval(mainloop,1000/100)
+            function gyradd(a,b){
+                return Float2.cdiv(Float2.add(a,b),Float2.ONE().add(Float2.cmult(a,b.conj())))
+            }
+            function gyrinv(a){
+                return Float2.smult(a,-1)
+            }
+            function gyration(a,b,c){
+                return gyradd(gyrinv(gyradd(a,b)),gyradd(a,gyradd(b,c)))
+            }
+            function gyrcoadd(a,b){
+                return gyradd(a,gyration(a,gyrinv(b),b))
+            }
+            var wdown=false;
+            var sdown=false;
+            var adown=false;
+            var ddown=false;
+            document.addEventListener("keydown",(e)=>{
+                if(e.keyCode==87){
+                    wdown=true;
+                }
+                if(e.keyCode==83){
+                    sdown=true;
+                }
+                if(e.keyCode==65){
+                    adown=true;
+                }
+                if(e.keyCode==68){
+                    ddown=true;
+                }
+            })
+            document.addEventListener("keyup",(e)=>{
+                if(e.keyCode==87){
+                    wdown=false;
+                }
+                if(e.keyCode==83){
+                    sdown=false;
+                }
+                if(e.keyCode==65){
+                    adown=false;
+                }
+                if(e.keyCode==68){
+                    ddown=false;
+                }
+            })
+            var playerpos=new Float2(0,0)
+            var upvec=new Float2(0,.005);
+            var downvec=new Float2(0,-.005);
+            var leftvec=new Float2(-.005,0);
+            var rightvec=new Float2(.005,0);
+            var lastmov=new Float2(0,0);
+            var lastpos=playerpos;
+            function mainloop(){
+                clearScreen()
+                drawCircle("#FFFFFF",500,[0,0])
+                drawCircle("#FF0000",10,[playerpos.float1*500,-playerpos.float2*500])
+                drawLine("#00FF00",3,[playerpos.float1*500,-playerpos.float2*500,playerpos.float1*500+upvec.float1*10000,-playerpos.float2*500-upvec.float2*10000])
+                lastmov=new Float2(0,0)
+                if(wdown){
+                    lastmov.add_by(upvec);
+                }
+                if(sdown){
+                    lastmov.add_by(downvec);
+                }
+                if(adown){
+                    lastmov.add_by(leftvec);
+                }
+                if(ddown){
+                    lastmov.add_by(rightvec);
+                }
+                lastpos=playerpos;
+                playerpos=gyradd(playerpos,lastmov)
+                upvec=gyration(lastpos,lastmov,upvec);
+                downvec=gyration(lastpos,lastmov,downvec);
+                leftvec=gyration(lastpos,lastmov,leftvec);
+                rightvec=gyration(lastpos,lastmov,rightvec);
+            }
+        </script>
+   </body>
+</html>
